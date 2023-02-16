@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class GeneratorId {
     private int id;
 
-    public int generate(){
+    public int generate() {
         id++;
         return id;
     }
