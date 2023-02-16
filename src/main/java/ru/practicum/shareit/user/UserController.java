@@ -21,13 +21,15 @@ public class UserController {
     private final UserService userService;
     private final UserValidationService userValidationService;
 
-    @GetMapping()
+    private static final String USER_ID_PATH_VARIABLE = "userId";
+
+    @GetMapping
     public List<UserDto> findAllUsers() {
         return userService.getAll();
     }
 
-    @GetMapping(value = "/{userId}")
-    public UserDto findUserById(@PathVariable("userId") int userid) {
+    @GetMapping(value = "/{" + USER_ID_PATH_VARIABLE + "}")
+    public UserDto findUserById(@PathVariable(USER_ID_PATH_VARIABLE) int userid) {
         return userService.getById(userid);
     }
 
@@ -37,15 +39,15 @@ public class UserController {
         return userService.create(userDto);
     }
 
-    @PatchMapping(value = "/{userId}")
-    public UserDto patchUser(@PathVariable("userId") int userid, @RequestBody UserDto userDto) {
+    @PatchMapping(value = "/{" + USER_ID_PATH_VARIABLE + "}")
+    public UserDto patchUser(@PathVariable(USER_ID_PATH_VARIABLE) int userid, @RequestBody UserDto userDto) {
         userDto.setId(userid);
         userValidationService.validateUserUpdate(userDto);
         return userService.update(userDto);
     }
 
-    @DeleteMapping(value = "/{userId}")
-    public void removeUserById(@PathVariable("userId") int userId) {
+    @DeleteMapping(value = "/{" + USER_ID_PATH_VARIABLE + "}")
+    public void removeUserById(@PathVariable(USER_ID_PATH_VARIABLE) int userId) {
         userService.deleteById(userId);
     }
 }

@@ -34,7 +34,7 @@ public class UserRepositoryImpl implements UserRepository {
             if (!users.containsKey(userId)) {
                 users.put(userId, user);
             } else {
-                throw new IllegalArgumentException("Вы пытаетесь создать существующего User'а.");
+                throw new IllegalArgumentException("Вы пытаетесь создать существующего пользователя.");
             }
             return user;
         } else {
@@ -46,10 +46,10 @@ public class UserRepositoryImpl implements UserRepository {
     public User update(User user) {
         int userId = user.getId();
         if (!users.containsKey(userId)) {
-            throw new IllegalArgumentException("Вы пытаетесь обновить несуществующего User'а.");
+            throw new IllegalArgumentException("Вы пытаетесь обновить несуществующего пользователя.");
         } else {
             User oldUser = users.get(userId);
-            if (!isUserEmailUnique(user)) {
+            if (!isUserEmailUnique(user) && !oldUser.getEmail().equals(user.getEmail())) {
                 throw new InvalidFieldException("This email already exists");
             } else {
                 merge(oldUser, user);

@@ -63,7 +63,7 @@ public class ItemRepositoryImpl implements ItemRepository {
         int itemId = item.getId();
         List<Item> itemsByOwnerId = items.get(ownerId);
         if (itemsByOwnerId == null) {
-            throw new IllegalArgumentException("Вы пытаетесь обновить несуществующий Item.");
+            throw new IllegalArgumentException("Вы пытаетесь обновить несуществующую вещь.");
         }
         Item oldItem = itemsByOwnerId.stream()
                 .filter(item1 -> item1.getId() == itemId)

@@ -14,14 +14,15 @@ public class ItemController {
     private final ItemService itemService;
     private final ItemValidationService itemValidationService;
     private static final String REQUEST_HEADER = "X-Sharer-User-Id";
+    private static final String ITEM_ID_PATH_VARIABLE = "itemId";
 
-    @GetMapping()
+    @GetMapping
     public List<ItemDto> findAllItems(@RequestHeader(REQUEST_HEADER) int ownerId) {
         return itemService.getAllById(ownerId);
     }
 
-    @GetMapping(value = "/{itemId}")
-    public ItemDto findItemById(@PathVariable("itemId") int itemId) {
+    @GetMapping(value = "/{" + ITEM_ID_PATH_VARIABLE + "}")
+    public ItemDto findItemById(@PathVariable(ITEM_ID_PATH_VARIABLE) int itemId) {
         return itemService.getById(itemId);
     }
 
@@ -32,8 +33,8 @@ public class ItemController {
         return itemService.create(ownerId, itemDto);
     }
 
-    @PatchMapping(value = "/{itemId}")
-    public ItemDto patchItem(@RequestHeader(REQUEST_HEADER) int ownerId, @PathVariable("itemId") int itemId, @RequestBody ItemDto itemDto) {
+    @PatchMapping(value = "/{" + ITEM_ID_PATH_VARIABLE + "}")
+    public ItemDto patchItem(@RequestHeader(REQUEST_HEADER) int ownerId, @PathVariable(ITEM_ID_PATH_VARIABLE) int itemId, @RequestBody ItemDto itemDto) {
         itemDto.setOwnerId(ownerId);
         itemDto.setId(itemId);
         itemValidationService.validateItemUpdate(itemDto);
@@ -45,8 +46,8 @@ public class ItemController {
         return itemService.searchItemsByText(text);
     }
 
-    @DeleteMapping(value = "/{itemId}")
-    public void removeItemById(@RequestHeader(REQUEST_HEADER) int ownerId, @PathVariable("itemId") int itemId) {
+    @DeleteMapping(value = "/{" + ITEM_ID_PATH_VARIABLE + "}")
+    public void removeItemById(@RequestHeader(REQUEST_HEADER) int ownerId, @PathVariable(ITEM_ID_PATH_VARIABLE) int itemId) {
         itemService.deleteById(ownerId, itemId);
     }
 
