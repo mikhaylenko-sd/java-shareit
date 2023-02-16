@@ -5,7 +5,7 @@ import ru.practicum.shareit.item.ItemDto;
 import java.util.List;
 
 public interface ItemService {
-    List<ItemDto> getAll(int ownerId);
+    List<ItemDto> getAllById(int ownerId);
 
     ItemDto getById(int itemId);
 
@@ -13,9 +13,9 @@ public interface ItemService {
 
     ItemDto update(Integer ownerId, ItemDto itemDto);
 
-    void delete(ItemDto itemDto);
+    void deleteItem(int ownerId, ItemDto itemDto);
 
-    void deleteById(int itemId);
+    void deleteById(int ownerId, int itemId);
 
-    List<ItemDto> findItemsBySearch(String text);
+    List<ItemDto> searchItemsByText(String text);
 }

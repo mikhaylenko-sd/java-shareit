@@ -1,28 +1,30 @@
 package ru.practicum.shareit.item.repository;
 
-import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.GeneratorId;
 import ru.practicum.shareit.exception.ItemNotFoundException;
 import ru.practicum.shareit.exception.UserNotFoundException;
-import ru.practicum.shareit.GeneratorId;
 import ru.practicum.shareit.item.Item;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Repository
-@AllArgsConstructor
 public class ItemRepositoryImpl implements ItemRepository {
-    private final Map<Integer, List<Item>> items;
-    private final GeneratorId generatorId;
+    private final Map<Integer, List<Item>> items = new HashMap<>();
+    private final GeneratorId generatorId = new GeneratorId();
 
     @Override
-    public List<Item> getAll(int ownerId) {
+    public List<Item> getAllByOwnerId(int ownerId) {
         return items.get(ownerId);
     }
 
     @Override
-    public List<Item> findItemsBySearch(String text) {
+    public List<Item> searchItemsByText(String text) {
         return items.values().stream()
                 .flatMap(Collection::stream)
                 .filter(item -> item.getAvailable() && (item.getName().toLowerCase().contains(text) || item.getDescription().toLowerCase().contains(text)))
@@ -35,13 +37,11 @@ public class ItemRepositoryImpl implements ItemRepository {
                 .flatMap(Collection::stream)
                 .filter(item -> item.getId() == itemId)
                 .findFirst()
-                .orElseThrow(() -> new ItemNotFoundException(itemId));
+                .get();
     }
 
     @Override
     public Item create(Item item) {
-        isValid(item);
-
         item.setId(generatorId.generate());
         int ownerId = item.getOwnerId();
         if (!items.containsKey(ownerId)) {
@@ -57,51 +57,48 @@ public class ItemRepositoryImpl implements ItemRepository {
     @Override
     public Item update(Item item) {
         int ownerId = item.getOwnerId();
-        if (items.get(ownerId) != null) {
-            Item oldItem = items.get(ownerId).stream()
-                    .filter(item1 -> item1.getId() == item.getId())
-                    .findFirst()
-                    .orElseThrow(() -> new UserNotFoundException(ownerId));
-            if (item.getName() != null && item.getDescription() != null && item.getAvailable() != null) {
-                items.get(ownerId).remove(oldItem);
-                oldItem.setName(item.getName());
-                oldItem.setDescription(item.getDescription());
-                oldItem.setAvailable(item.getAvailable());
-                items.get(ownerId).add(oldItem);
-            } else if (item.getName() == null && item.getDescription() == null) {
-                items.get(ownerId).remove(oldItem);
-                oldItem.setAvailable(item.getAvailable());
-                items.get(ownerId).add(oldItem);
-            } else if (item.getName() == null && item.getAvailable() == null) {
-                items.get(ownerId).remove(oldItem);
-                oldItem.setDescription(item.getDescription());
-                items.get(ownerId).add(oldItem);
-            } else if (item.getDescription() == null && item.getAvailable() == null) {
-                items.get(ownerId).remove(oldItem);
-                oldItem.setName(item.getName());
-                items.get(ownerId).add(oldItem);
-            } else {
-                throw new IllegalArgumentException("Вы пытаетесь обновить несуществующего Item'а.");
-            }
-            return oldItem;
-        } else {
+        if (!items.containsKey(ownerId)) {
             throw new UserNotFoundException(ownerId);
         }
+        int itemId = item.getId();
+        List<Item> itemsByOwnerId = items.get(ownerId);
+        if (itemsByOwnerId == null) {
+            throw new IllegalArgumentException("Вы пытаетесь обновить несуществующий Item.");
+        }
+        Item oldItem = itemsByOwnerId.stream()
+                .filter(item1 -> item1.getId() == itemId)
+                .findFirst()
+                .orElseThrow(() -> new ItemNotFoundException(itemId));
+        itemsByOwnerId.remove(oldItem);
+        merge(oldItem, item);
+        itemsByOwnerId.add(oldItem);
+        return oldItem;
     }
 
-    @Override
-    public void delete(Item item) {
+    private void merge(Item oldItem, Item newItem) {
+        String name = newItem.getName();
+        String description = newItem.getDescription();
+        Boolean available = newItem.getAvailable();
 
-    }
-
-    @Override
-    public void deleteById(int itemId) {
-
-    }
-
-    public void isValid(Item item) {
-        if (item.getName().isBlank() || item.getDescription().isBlank() || item.getAvailable() == null) {
-            throw new IllegalArgumentException();
+        if (name != null) {
+            oldItem.setName(name);
+        }
+        if (description != null) {
+            oldItem.setDescription(description);
+        }
+        if (available != null) {
+            oldItem.setAvailable(available);
         }
     }
+
+    @Override
+    public void deleteItem(int ownerId, Item item) {
+        getAllByOwnerId(ownerId).remove(item);
+    }
+
+    @Override
+    public void deleteById(int ownerId, int itemId) {
+        getAllByOwnerId(ownerId).removeIf(item -> item.getId() == itemId);
+    }
+
 }

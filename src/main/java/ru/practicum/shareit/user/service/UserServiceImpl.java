@@ -15,20 +15,19 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
 
     @Override
     public List<UserDto> getAll() {
         return userRepository.getAll().stream()
-                .map(userMapper::toUserDto)
+                .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
     }
 
-@Override
+    @Override
     public UserDto getById(int userId) {
         User user = userRepository.getById(userId);
         if (user != null) {
-            return userMapper.toUserDto(user);
+            return UserMapper.toUserDto(user);
         } else {
             throw new UserNotFoundException(userId);
         }
@@ -36,21 +35,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto create(UserDto userDto) {
-        User userFromDto = userMapper.toUser(userDto);
+        User userFromDto = UserMapper.toUser(userDto);
         User user = userRepository.create(userFromDto);
-        return userMapper.toUserDto(user);
+        return UserMapper.toUserDto(user);
     }
 
     @Override
     public UserDto update(UserDto userDto) {
-        User user = userMapper.toUser(userDto);
+        User user = UserMapper.toUser(userDto);
         User updatedUser = userRepository.update(user);
-        return userMapper.toUserDto(updatedUser);
+        return UserMapper.toUserDto(updatedUser);
     }
 
     @Override
     public void delete(UserDto userDto) {
-        User user = userMapper.toUser(userDto);
+        User user = UserMapper.toUser(userDto);
         userRepository.delete(user);
     }
 

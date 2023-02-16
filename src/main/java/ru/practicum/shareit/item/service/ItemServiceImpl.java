@@ -17,56 +17,58 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
-    private final ItemMapper itemMapper;
     private final UserService userService;
 
     @Override
-    public List<ItemDto> getAll(int ownerId) {
-        return itemRepository.getAll(ownerId).stream()
-                .map(itemMapper::toItemDto)
+    public List<ItemDto> getAllById(int ownerId) {
+        return itemRepository.getAllByOwnerId(ownerId).stream()
+                .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public ItemDto getById(int itemId) {
-        return itemMapper.toItemDto(itemRepository.getById(itemId));
+        Item item = itemRepository.getById(itemId);
+        if (item == null) {
+            throw new ItemNotFoundException(itemId);
+        }
+        return ItemMapper.toItemDto(item);
     }
 
     @Override
     public ItemDto create(int ownerId, ItemDto itemDto) {
         userService.getById(ownerId);
 
-        Item item = itemMapper.toItem(itemDto);
-        return itemMapper.toItemDto(itemRepository.create(item));
+        Item item = ItemMapper.toItem(itemDto);
+        return ItemMapper.toItemDto(itemRepository.create(item));
     }
 
     @Override
     public ItemDto update(Integer ownerId, ItemDto itemDto) {
         userService.getById(ownerId);
-        Item item = itemMapper.toItem(itemDto);
-        return itemMapper.toItemDto(itemRepository.update(item));
+        Item item = ItemMapper.toItem(itemDto);
+        return ItemMapper.toItemDto(itemRepository.update(item));
     }
 
     @Override
-    public List<ItemDto> findItemsBySearch(String text) {
-        if (!text.isBlank()) {
-            return itemRepository.findItemsBySearch(text.toLowerCase()).stream()
-                    .map(itemMapper::toItemDto)
-                    .collect(Collectors.toList());
-        } else {
+    public List<ItemDto> searchItemsByText(String text) {
+        if (text.isBlank()) {
             return new ArrayList<>();
+        } else {
+            return itemRepository.searchItemsByText(text.toLowerCase()).stream()
+                    .map(ItemMapper::toItemDto)
+                    .collect(Collectors.toList());
         }
     }
 
     @Override
-    public void delete(ItemDto itemDto) {
-
+    public void deleteItem(int ownerId, ItemDto itemDto) {
+        itemRepository.deleteItem(ownerId, ItemMapper.toItem(itemDto));
     }
 
     @Override
-    public void deleteById(int itemId) {
-
+    public void deleteById(int ownerId, int itemId) {
+        itemRepository.deleteById(ownerId, itemId);
     }
-
 
 }

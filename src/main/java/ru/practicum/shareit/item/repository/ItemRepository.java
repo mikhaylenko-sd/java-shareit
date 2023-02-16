@@ -5,8 +5,9 @@ import ru.practicum.shareit.item.Item;
 import java.util.List;
 
 public interface ItemRepository {
-    List<Item> getAll(int ownerId);
-    List<Item> findItemsBySearch(String text);
+    List<Item> getAllByOwnerId(int ownerId);
+
+    List<Item> searchItemsByText(String text);
 
     Item getById(int itemId);
 
@@ -14,7 +15,7 @@ public interface ItemRepository {
 
     Item update(Item item);
 
-    void delete(Item item);
+    void deleteItem(int ownerId, Item item);
 
-    void deleteById(int itemId);
+    void deleteById(int ownerId, int itemId);
 }

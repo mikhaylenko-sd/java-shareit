@@ -19,5 +19,16 @@ public class ErrorHandler {
         return new ErrorResponse("Ресурс не найден", e.getMessage());
     }
 
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleInvalidField(final InvalidFieldException e) {
+        log.warn(e.getMessage());
+        return new ErrorResponse("Введено неверное значение поля", e.getMessage());
+    }
 
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleValidationException(final ValidationException e) {
+        log.warn(e.getMessage());
+        return new ErrorResponse("Ошибка при выполнении программы", e.getMessage());
+    }
 }
