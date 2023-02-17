@@ -8,9 +8,6 @@ import ru.practicum.shareit.user.UserDto;
 @Component
 public class UserValidationService {
     public void validateUserCreate(UserDto userDto) {
-        if (userDto.getName() == null) {
-            throw new ValidationException("Ошибка валидации. Имя пользователя не может быть пустым.");
-        }
         validateName(userDto);
         validateEmail(userDto);
     }
@@ -32,8 +29,8 @@ public class UserValidationService {
     }
 
     private void validateName(UserDto userDto) {
-        boolean isNameBlank = userDto.getName().isBlank();
-        if (isNameBlank) {
+        String name = userDto.getName();
+        if (name == null || name.isBlank()) {
             throw new ValidationException("Ошибка валидации. Имя пользователя не может быть пустым.");
         }
     }

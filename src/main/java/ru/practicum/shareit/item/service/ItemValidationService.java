@@ -7,18 +7,9 @@ import ru.practicum.shareit.item.ItemDto;
 @Component
 public class ItemValidationService {
     public void validateItemCreate(ItemDto itemDto) {
-        if (itemDto.getName() == null) {
-            throw new ValidationException("Ошибка валидации. Имя вещи не может быть пустым.");
-        }
-        if (itemDto.getDescription() == null) {
-            throw new ValidationException("Ошибка валидации. Описание вещи не может быть пустым.");
-        }
-        if (itemDto.getAvailable() == null) {
-            throw new ValidationException("Ошибка валидации. Необходимо указать доступность вещи.");
-        }
-
         validateName(itemDto);
         validateDescription(itemDto);
+        validateAvailable(itemDto);
     }
 
     public void validateItemUpdate(ItemDto itemDto) {
@@ -31,16 +22,22 @@ public class ItemValidationService {
     }
 
     private void validateName(ItemDto itemDto) {
-        boolean isNameBlank = itemDto.getName().isBlank();
-        if (isNameBlank) {
+        String name = itemDto.getName();
+        if (name == null || name.isBlank()) {
             throw new ValidationException("Ошибка валидации. Имя вещи не может быть пустым.");
         }
     }
 
     private void validateDescription(ItemDto itemDto) {
-        boolean isDescriptionBlank = itemDto.getDescription().isBlank();
-        if (isDescriptionBlank) {
+        String description = itemDto.getDescription();
+        if (description == null || description.isBlank()) {
             throw new ValidationException("Ошибка валидации. Описание вещи не может быть пустым.");
+        }
+    }
+
+    private void validateAvailable(ItemDto itemDto) {
+        if (itemDto.getAvailable() == null) {
+            throw new ValidationException("Ошибка валидации. Необходимо указать доступность вещи.");
         }
     }
 }
