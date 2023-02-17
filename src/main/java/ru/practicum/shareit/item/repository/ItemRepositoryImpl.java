@@ -3,7 +3,6 @@ package ru.practicum.shareit.item.repository;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.GeneratorId;
 import ru.practicum.shareit.exception.ItemNotFoundException;
-import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.item.Item;
 
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ public class ItemRepositoryImpl implements ItemRepository {
                 .flatMap(Collection::stream)
                 .filter(item -> item.getId() == itemId)
                 .findFirst()
-                .get();
+                .orElse(null);
     }
 
     @Override
@@ -57,18 +56,15 @@ public class ItemRepositoryImpl implements ItemRepository {
     @Override
     public Item update(Item item) {
         int ownerId = item.getOwnerId();
-        if (!items.containsKey(ownerId)) {
-            throw new UserNotFoundException(ownerId);
-        }
-        int itemId = item.getId();
         List<Item> itemsByOwnerId = items.get(ownerId);
         if (itemsByOwnerId == null) {
-            throw new IllegalArgumentException("Вы пытаетесь обновить несуществующую вещь.");
+            throw new ItemNotFoundException("У пользователя с id = " + ownerId + " пока нет вещей.");
         }
+
         Item oldItem = itemsByOwnerId.stream()
-                .filter(item1 -> item1.getId() == itemId)
+                .filter(item1 -> item1.getId() == item.getId())
                 .findFirst()
-                .orElseThrow(() -> new ItemNotFoundException(itemId));
+                .orElseThrow(() -> new ItemNotFoundException("У пользователя с id = " + ownerId + " нет данной вещи."));
         itemsByOwnerId.remove(oldItem);
         merge(oldItem, item);
         itemsByOwnerId.add(oldItem);
@@ -100,5 +96,4 @@ public class ItemRepositoryImpl implements ItemRepository {
     public void deleteById(int ownerId, int itemId) {
         getAllByOwnerId(ownerId).removeIf(item -> item.getId() == itemId);
     }
-
 }

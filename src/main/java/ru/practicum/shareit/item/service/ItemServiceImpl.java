@@ -54,11 +54,10 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> searchItemsByText(String text) {
         if (text.isBlank()) {
             return new ArrayList<>();
-        } else {
-            return itemRepository.searchItemsByText(text.toLowerCase()).stream()
-                    .map(ItemMapper::toItemDto)
-                    .collect(Collectors.toList());
         }
+        return itemRepository.searchItemsByText(text.toLowerCase()).stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
     }
 
     @Override

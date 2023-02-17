@@ -7,44 +7,34 @@ import ru.practicum.shareit.user.UserDto;
 
 @Component
 public class UserValidationService {
-    public boolean validateUserCreate(UserDto userDto) {
-        if (validateEmailWhenCreate(userDto) && validateNameWhenCreate(userDto)) {
-            return true;
-        } else {
-            throw new ValidationException("Validation exception");
+    public void validateUserCreate(UserDto userDto) {
+        if (userDto.getName() == null) {
+            throw new ValidationException("Ошибка валидации. Имя пользователя не может быть пустым.");
+        }
+        validateName(userDto);
+        validateEmail(userDto);
+    }
+
+    public void validateUserUpdate(UserDto userDto) {
+        if (userDto.getName() != null) {
+            validateName(userDto);
+        }
+        if (userDto.getEmail() != null) {
+            validateEmail(userDto);
         }
     }
 
-    public boolean validateUserUpdate(UserDto userDto) {
-        if (validateEmailWhenUpdate(userDto) && validateNameWhenUpdate(userDto)) {
-            return true;
-        } else {
-            throw new ValidationException("Validation exception");
-        }
-    }
-
-    private boolean validateEmailWhenCreate(UserDto userDto) {
+    private void validateEmail(UserDto userDto) {
         EmailValidator validator = EmailValidator.getInstance();
-        return validator.isValid(userDto.getEmail());
-    }
-
-    private boolean validateEmailWhenUpdate(UserDto userDto) {
-        if (userDto.getEmail() == null) {
-            return true;
+        if (!validator.isValid(userDto.getEmail())) {
+            throw new ValidationException("Ошибка валидации. Проверьте корректность адреса электронной почты.");
         }
-        return validateEmailWhenCreate(userDto);
     }
 
-    private boolean validateNameWhenCreate(UserDto userDto) {
-        String name = userDto.getName();
-        return name != null && !name.isBlank();
-    }
-
-    private boolean validateNameWhenUpdate(UserDto userDto) {
-        String name = userDto.getName();
-        if (name == null) {
-            return true;
+    private void validateName(UserDto userDto) {
+        boolean isNameBlank = userDto.getName().isBlank();
+        if (isNameBlank) {
+            throw new ValidationException("Ошибка валидации. Имя пользователя не может быть пустым.");
         }
-        return !name.isBlank();
     }
 }

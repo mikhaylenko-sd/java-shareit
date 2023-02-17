@@ -28,18 +28,11 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User create(User user) {
-        if (isUserEmailUnique(user)) {
-            int userId = generatorId.generate();
-            user.setId(userId);
-            if (!users.containsKey(userId)) {
-                users.put(userId, user);
-            } else {
-                throw new IllegalArgumentException("Вы пытаетесь создать существующего пользователя.");
-            }
-            return user;
-        } else {
-            throw new InvalidFieldException("This email already exists");
-        }
+        checkUniqueEmail(user);
+        int userId = generatorId.generate();
+        user.setId(userId);
+        users.put(userId, user);
+        return user;
     }
 
     @Override
@@ -47,16 +40,14 @@ public class UserRepositoryImpl implements UserRepository {
         int userId = user.getId();
         if (!users.containsKey(userId)) {
             throw new IllegalArgumentException("Вы пытаетесь обновить несуществующего пользователя.");
-        } else {
-            User oldUser = users.get(userId);
-            if (!isUserEmailUnique(user) && !oldUser.getEmail().equals(user.getEmail())) {
-                throw new InvalidFieldException("This email already exists");
-            } else {
-                merge(oldUser, user);
-                users.put(userId, oldUser);
-            }
-            return oldUser;
         }
+        User oldUser = users.get(userId);
+        if (!oldUser.getEmail().equals(user.getEmail())) {
+            checkUniqueEmail(user);
+        }
+        merge(oldUser, user);
+        users.put(userId, oldUser);
+        return oldUser;
     }
 
     @Override
@@ -81,9 +72,11 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
 
-    private boolean isUserEmailUnique(User user) {
-        return users.values().stream()
+    private void checkUniqueEmail(User user) {
+        if (users.values().stream()
                 .map(User::getEmail)
-                .noneMatch(email -> email.equals(user.getEmail()));
+                .anyMatch(email -> email.equals(user.getEmail()))) {
+            throw new InvalidFieldException("Пользователь с данной электронной почтой уже существует.");
+        }
     }
 }

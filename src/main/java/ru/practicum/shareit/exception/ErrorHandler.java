@@ -19,6 +19,7 @@ public class ErrorHandler {
         return new ErrorResponse("Ресурс не найден", e.getMessage());
     }
 
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleInvalidField(final InvalidFieldException e) {
         log.warn(e.getMessage());
