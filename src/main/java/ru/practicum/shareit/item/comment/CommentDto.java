@@ -18,6 +18,7 @@ public class CommentDto {
     String text;
     String authorName;
     LocalDateTime created;
+
     public Long getId() {
         return id;
     }

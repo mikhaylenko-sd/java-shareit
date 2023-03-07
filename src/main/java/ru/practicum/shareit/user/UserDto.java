@@ -16,6 +16,7 @@ public class UserDto {
     Long id;
     String name;
     String email;
+
     public Long getId() {
         return id;
     }
