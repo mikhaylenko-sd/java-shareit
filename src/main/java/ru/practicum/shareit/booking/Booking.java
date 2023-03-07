@@ -30,7 +30,6 @@ import java.util.Objects;
 @NoArgsConstructor
 public class Booking {
     @Id
-    @Column(name = "booking_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     @Column(name = "start_date")

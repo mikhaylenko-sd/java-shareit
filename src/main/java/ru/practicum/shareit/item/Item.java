@@ -22,7 +22,6 @@ import java.util.Objects;
 @AllArgsConstructor
 public class Item {
     @Id
-    @Column(name = "item_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     String name;

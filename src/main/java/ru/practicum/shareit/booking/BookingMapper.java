@@ -1,15 +1,13 @@
 package ru.practicum.shareit.booking;
 
-import org.springframework.stereotype.Component;
-import ru.practicum.shareit.booking.dto.BookingOutputDto;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
+import ru.practicum.shareit.booking.dto.BookingOutputDto;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserMapper;
 
 
-@Component
 public class BookingMapper {
     public static BookingOutputDto toBookingDto(Booking booking) {
         return BookingOutputDto.builder()

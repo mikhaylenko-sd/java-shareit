@@ -27,7 +27,6 @@ import java.util.Objects;
 @AllArgsConstructor
 public class Comment {
     @Id
-    @Column(name = "comment_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;
     String text;
