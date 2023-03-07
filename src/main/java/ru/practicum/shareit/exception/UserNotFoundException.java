@@ -1,7 +1,7 @@
 package ru.practicum.shareit.exception;
 
 public class UserNotFoundException extends InvalidIdException {
-    public UserNotFoundException(Integer id) {
+    public UserNotFoundException(long id) {
         super(String.format("User с id = %d не найден", id));
     }
 
