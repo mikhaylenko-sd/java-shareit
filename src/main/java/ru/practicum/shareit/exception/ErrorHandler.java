@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ErrorHandler {
 
     @ExceptionHandler({ItemNotFoundException.class,
-            UserNotFoundException.class}
+            UserNotFoundException.class, BookingNotFoundException.class}
     )
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final InvalidIdException e) {
@@ -20,7 +20,7 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleInvalidField(final InvalidFieldException e) {
         log.warn(e.getMessage());
         return new ErrorResponse("Введено неверное значение поля", e.getMessage());
@@ -31,5 +31,19 @@ public class ErrorHandler {
     public ErrorResponse handleValidationException(final ValidationException e) {
         log.warn(e.getMessage());
         return new ErrorResponse("Ошибка при выполнении программы", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleUnsupportedStatusException(final UnsupportedStatusException e) {
+        log.warn(e.getMessage());
+        return new ErrorResponse("Unknown state: UNSUPPORTED_STATUS", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleCommentCreationException(final CommentCreationException e) {
+        log.warn(e.getMessage());
+        return new ErrorResponse("Ошибка при создании комментария", e.getMessage());
     }
 }

@@ -1,50 +1,55 @@
 package ru.practicum.shareit.user.service;
 
-import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserDto;
 import ru.practicum.shareit.user.UserMapper;
-import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.user.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
+    public UserServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     @Override
     public List<UserDto> getAll() {
-        return userRepository.getAll().stream()
+        return userRepository.findAll().stream()
                 .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public UserDto getById(int userId) {
-        User user = userRepository.getById(userId);
-        if (user != null) {
-            return UserMapper.toUserDto(user);
-        } else {
-            throw new UserNotFoundException(userId);
-        }
+    public UserDto getById(long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        return UserMapper.toUserDto(user.orElseThrow(() -> new UserNotFoundException(userId)));
     }
 
     @Override
     public UserDto create(UserDto userDto) {
         User userFromDto = UserMapper.toUser(userDto);
-        User user = userRepository.create(userFromDto);
+        User user = userRepository.save(userFromDto);
         return UserMapper.toUserDto(user);
     }
 
-    @Override
     public UserDto update(UserDto userDto) {
-        User user = UserMapper.toUser(userDto);
-        User updatedUser = userRepository.update(user);
-        return UserMapper.toUserDto(updatedUser);
+        User newUser = UserMapper.toUser(userDto);
+        Long userId = newUser.getId();
+        if (userId == null) {
+            throw new IllegalArgumentException("Вы пытаетесь обновить несуществующего пользователя.");
+        }
+
+        User oldUser = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        merge(oldUser, newUser);
+        userRepository.save(oldUser);
+        return UserMapper.toUserDto(oldUser);
     }
 
     @Override
@@ -54,7 +59,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteById(int userId) {
+    public void deleteById(long userId) {
         userRepository.deleteById(userId);
+    }
+
+    private void merge(User oldUser, User newUser) {
+        String name = newUser.getName();
+        String email = newUser.getEmail();
+
+        if (name != null) {
+            oldUser.setName(name);
+        }
+        if (email != null) {
+            oldUser.setEmail(email);
+        }
     }
 }
