@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -17,37 +18,42 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping(path = "/users")
+@Slf4j
 public class UserController {
+    private static final String USER_ID_PATH_VARIABLE = "userId";
     private final UserService userService;
     private final UserValidationService userValidationService;
 
-    private static final String USER_ID_PATH_VARIABLE = "userId";
-
     @GetMapping
     public List<UserDto> findAllUsers() {
+        log.info("Получен запрос к эндпоинту: {} {}", "GET", "/users");
         return userService.getAll();
     }
 
     @GetMapping(value = "/{" + USER_ID_PATH_VARIABLE + "}")
-    public UserDto findUserById(@PathVariable(USER_ID_PATH_VARIABLE) int userid) {
-        return userService.getById(userid);
+    public UserDto findUserById(@PathVariable(USER_ID_PATH_VARIABLE) long userId) {
+        log.info("Получен запрос к эндпоинту: {} /users/{}", "GET", userId);
+        return userService.getById(userId);
     }
 
     @PostMapping
     public UserDto createUser(@RequestBody UserDto userDto) {
+        log.info("Получен запрос к эндпоинту: {} {}", "POST", "/users");
         userValidationService.validateUserCreate(userDto);
         return userService.create(userDto);
     }
 
     @PatchMapping(value = "/{" + USER_ID_PATH_VARIABLE + "}")
-    public UserDto patchUser(@PathVariable(USER_ID_PATH_VARIABLE) int userid, @RequestBody UserDto userDto) {
-        userDto.setId(userid);
+    public UserDto patchUser(@PathVariable(USER_ID_PATH_VARIABLE) long userId, @RequestBody UserDto userDto) {
+        log.info("Получен запрос к эндпоинту: {} /users/{}", "PATCH", userId);
+        userDto.setId(userId);
         userValidationService.validateUserUpdate(userDto);
         return userService.update(userDto);
     }
 
     @DeleteMapping(value = "/{" + USER_ID_PATH_VARIABLE + "}")
-    public void removeUserById(@PathVariable(USER_ID_PATH_VARIABLE) int userId) {
+    public void removeUserById(@PathVariable(USER_ID_PATH_VARIABLE) long userId) {
+        log.info("Получен запрос к эндпоинту: {} /users/{}", "DELETE", userId);
         userService.deleteById(userId);
     }
 }
