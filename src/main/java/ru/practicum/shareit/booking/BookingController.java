@@ -11,8 +11,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.shareit.booking.dto.BookingOutputDto;
+import ru.practicum.shareit.ParameterPaginationService;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
+import ru.practicum.shareit.booking.dto.BookingOutputDto;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.booking.service.BookingValidationService;
 
@@ -27,6 +28,7 @@ public class BookingController {
     private static final String BOOKING_ID_PATH_VARIABLE = "bookingId";
     private final BookingService bookingService;
     private final BookingValidationService bookingValidationService;
+    private ParameterPaginationService parameterPaginationService;
 
     @PostMapping
     public BookingOutputDto create(@RequestHeader(REQUEST_HEADER) long userId, @RequestBody BookingInputDto bookingDto) {
@@ -48,14 +50,20 @@ public class BookingController {
     }
 
     @GetMapping
-    public List<BookingOutputDto> getAllBookingsByUserId(@RequestHeader(REQUEST_HEADER) long userId, @RequestParam(value = "state", defaultValue = "ALL") String state) {
-        log.info("Получен запрос к эндпоинту: {} {}", "GET", "/bookings");
-        return bookingService.getAllBookingsByUserId(userId, state);
+    public List<BookingOutputDto> getAllBookingsByUserId(@RequestHeader(REQUEST_HEADER) long userId, @RequestParam(value = "state", defaultValue = "ALL") String state,
+                                                         @RequestParam(value = "from", required = false, defaultValue = "0") int from,
+                                                         @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        log.info("Получен запрос к эндпоинту: {} /bookings?from={}&size={}", "GET", from, size);
+        parameterPaginationService.validateRequestParameters(from, size);
+        return bookingService.getAllBookingsByUserId(userId, state, from, size);
     }
 
     @GetMapping(value = "/owner")
-    public List<BookingOutputDto> getAllBookingsByOwner(@RequestHeader(REQUEST_HEADER) long ownerId, @RequestParam(value = "state", defaultValue = "ALL") String state) {
-        log.info("Получен запрос к эндпоинту: {} {}", "GET", "/bookings/owner");
-        return bookingService.getAllBookingsByOwnerId(ownerId, state);
+    public List<BookingOutputDto> getAllBookingsByOwner(@RequestHeader(REQUEST_HEADER) long ownerId, @RequestParam(value = "state", defaultValue = "ALL") String state,
+                                                        @RequestParam(value = "from", required = false, defaultValue = "0") int from,
+                                                        @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        log.info("Получен запрос к эндпоинту: {} /bookings/owner?from={}&size={}", "GET", from, size);
+        parameterPaginationService.validateRequestParameters(from, size);
+        return bookingService.getAllBookingsByOwnerId(ownerId, state, from, size);
     }
 }

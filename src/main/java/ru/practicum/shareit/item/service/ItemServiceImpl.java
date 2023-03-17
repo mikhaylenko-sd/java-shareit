@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.service;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
@@ -41,8 +42,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getAllByOwnerId(long ownerId) {
-        List<ItemDto> items = itemRepository.findAllByOwnerId(ownerId).stream()
+    public List<ItemDto> getAllByOwnerId(long ownerId, int from, int size) {
+        List<ItemDto> items = itemRepository.findAllByOwnerId(ownerId, PageRequest.of(from, size)).stream()
                 .map(ItemMapper::toItemDto)
                 .sorted(Comparator.comparing(ItemDto::getId))
                 .collect(Collectors.toList());
@@ -106,11 +107,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> searchItemsByText(String text) {
+    public List<ItemDto> searchItemsByText(String text, int from, int size) {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemRepository.searchItemsByText(text.toLowerCase()).stream()
+        return itemRepository.searchItemsByText(text.toLowerCase(), PageRequest.of(from, size)).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
@@ -155,7 +156,7 @@ public class ItemServiceImpl implements ItemService {
 
     private void setLastAndNextBookings(long itemId, ItemDto itemDto) {
         LocalDateTime now = LocalDateTime.now();
-        Booking lastBooking = bookingRepository.findFirstBookingByItem_IdAndStatusAndEndBeforeOrderByEndDesc(itemId, Status.APPROVED, now);
+        Booking lastBooking = bookingRepository.findFirstBookingByItem_IdAndStatusAndStartBeforeOrderByEndDesc(itemId, Status.APPROVED, now);
         Booking nextBooking = bookingRepository.findFirstBookingByItem_IdAndStatusAndStartAfterOrderByStartAsc(itemId, Status.APPROVED, now);
 
         if (lastBooking == null) {

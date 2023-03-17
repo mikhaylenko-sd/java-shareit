@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.shareit.ParameterPaginationService;
 import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.service.ItemValidationService;
@@ -27,11 +28,14 @@ public class ItemController {
     private static final String ITEM_ID_PATH_VARIABLE = "itemId";
     private final ItemService itemService;
     private final ItemValidationService itemValidationService;
+    private ParameterPaginationService parameterPaginationService;
 
     @GetMapping
-    public List<ItemDto> findAllItems(@RequestHeader(REQUEST_HEADER) long ownerId) {
-        log.info("Получен запрос к эндпоинту: {} {}", "GET", "/items");
-        return itemService.getAllByOwnerId(ownerId);
+    public List<ItemDto> findAllItems(@RequestHeader(REQUEST_HEADER) long ownerId, @RequestParam(value = "from", required = false, defaultValue = "0") int from,
+                                      @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        log.info("Получен запрос к эндпоинту: {} /items?from={}&size={}", "GET", from, size);
+        parameterPaginationService.validateRequestParameters(from, size);
+        return itemService.getAllByOwnerId(ownerId, from, size);
     }
 
     @GetMapping(value = "/{" + ITEM_ID_PATH_VARIABLE + "}")
@@ -58,9 +62,11 @@ public class ItemController {
     }
 
     @GetMapping(value = "/search")
-    public List<ItemDto> searchItems(@RequestParam String text) {
-        log.info("Получен запрос к эндпоинту: {} {}", "GET", "/items/search");
-        return itemService.searchItemsByText(text);
+    public List<ItemDto> searchItems(@RequestParam String text, @RequestParam(value = "from", required = false, defaultValue = "0") int from,
+                                     @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        log.info("Получен запрос к эндпоинту: {} /items/search?from={}&size={}", "GET", from, size);
+        parameterPaginationService.validateRequestParameters(from, size);
+        return itemService.searchItemsByText(text, from, size);
     }
 
     @DeleteMapping(value = "/{" + ITEM_ID_PATH_VARIABLE + "}")
