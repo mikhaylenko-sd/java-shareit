@@ -80,10 +80,4 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         itemRequestDto.setItems(itemDtos);
     }
-
-    private void containsItemRequest(long requestId) {
-        if (itemRequestRepository.countItemRequestById(requestId) == 0) {
-            throw new ItemRequestNotFoundException(requestId);
-        }
-    }
 }

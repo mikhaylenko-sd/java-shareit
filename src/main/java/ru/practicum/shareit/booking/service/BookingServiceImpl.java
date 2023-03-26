@@ -175,18 +175,6 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toList());
     }
 
-    public BookingOutputDto findLastBookingByItemId(long itemId) {
-        LocalDateTime now = LocalDateTime.now();
-        Booking lastBooking = bookingRepository.findFirstBookingByItem_IdAndStatusAndEndBeforeOrderByEndDesc(itemId, Status.APPROVED, now);
-        return BookingMapper.toBookingDto(lastBooking);
-    }
-
-    public BookingOutputDto findNextBookingByItemId(long itemId) {
-        LocalDateTime now = LocalDateTime.now();
-        Booking nextBooking = bookingRepository.findFirstBookingByItem_IdAndStatusAndStartAfterOrderByStartAsc(itemId, Status.APPROVED, now);
-        return BookingMapper.toBookingDto(nextBooking);
-    }
-
     private Booking getById(long bookingId) {
         Booking booking = bookingRepository.findBookingById(bookingId);
         if (booking == null) {
