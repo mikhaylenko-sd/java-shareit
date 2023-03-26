@@ -47,6 +47,9 @@ class BookingServiceUnitTest {
     private BookingRepository bookingRepository;
 
     private static long counter = 0;
+    private UserDto owner;
+    private UserDto booker;
+    private ItemDto item;
 
     private static UserDto generateUser() {
         return UserDto.builder()
@@ -88,13 +91,13 @@ class BookingServiceUnitTest {
     @BeforeEach
     void setUp() {
         bookingService = new BookingServiceImpl(userService, itemService, bookingRepository);
+        owner = generateUser();
+        booker = generateUser();
+        item = generateItem(owner.getId());
     }
 
     @Test
     void testCreateBooking() {
-        UserDto owner = generateUser();
-        UserDto booker = generateUser();
-        ItemDto item = generateItem(owner.getId());
         BookingInputDto bookingInput = generateBookingInput(item.getId());
 
         when(userService.getById(anyLong()))
@@ -113,8 +116,6 @@ class BookingServiceUnitTest {
 
     @Test
     void testExceptionCreateBookingByOwner() {
-        UserDto owner = generateUser();
-        ItemDto item = generateItem(owner.getId());
         BookingInputDto bookingInput = generateBookingInput(item.getId());
 
         when(userService.getById(anyLong()))
@@ -127,8 +128,6 @@ class BookingServiceUnitTest {
 
     @Test
     void testExceptionCreateBookingByFalseAvailable() {
-        UserDto owner = generateUser();
-        ItemDto item = generateItem(owner.getId());
         item.setAvailable(false);
         BookingInputDto bookingInput = generateBookingInput(item.getId());
 
@@ -142,9 +141,6 @@ class BookingServiceUnitTest {
 
     @Test
     void testApproveOrRejectBooking() {
-        UserDto owner = generateUser();
-        UserDto booker = generateUser();
-        ItemDto item = generateItem(owner.getId());
         BookingInputDto bookingInput = generateBookingInput(item.getId());
         Booking booking = new Booking(1L, bookingInput.getStart(), bookingInput.getEnd(),
                 ItemMapper.toItem(item), UserMapper.toUser(booker), Status.WAITING);
@@ -168,9 +164,6 @@ class BookingServiceUnitTest {
 
     @Test
     void testExceptionApproveOrRejectBookingWithRejectedStatus() {
-        UserDto owner = generateUser();
-        UserDto booker = generateUser();
-        ItemDto item = generateItem(owner.getId());
         BookingInputDto bookingInput = generateBookingInput(item.getId());
         Booking booking = new Booking(1L, bookingInput.getStart(), bookingInput.getEnd(),
                 ItemMapper.toItem(item), UserMapper.toUser(booker), Status.REJECTED);
@@ -190,10 +183,7 @@ class BookingServiceUnitTest {
 
     @Test
     void testExceptionApproveOrRejectBookingWithOtherOwner() {
-        UserDto owner = generateUser();
-        UserDto booker = generateUser();
         UserDto otherUser = generateUser();
-        ItemDto item = generateItem(owner.getId());
         BookingInputDto bookingInput = generateBookingInput(item.getId());
         Booking booking = new Booking(1L, bookingInput.getStart(), bookingInput.getEnd(),
                 ItemMapper.toItem(item), UserMapper.toUser(booker), Status.REJECTED);
@@ -215,9 +205,6 @@ class BookingServiceUnitTest {
 
     @Test
     void testGetBookingByBookingId() {
-        UserDto owner = generateUser();
-        UserDto booker = generateUser();
-        ItemDto item = generateItem(owner.getId());
         BookingInputDto bookingInput = generateBookingInput(item.getId());
         Booking booking = new Booking(1L, bookingInput.getStart(), bookingInput.getEnd(),
                 ItemMapper.toItem(item), UserMapper.toUser(booker), Status.WAITING);
@@ -231,10 +218,7 @@ class BookingServiceUnitTest {
 
     @Test
     void testExceptionGetBookingByBookingIdByOtherUser() {
-        UserDto owner = generateUser();
-        UserDto booker = generateUser();
         UserDto otherUser = generateUser();
-        ItemDto item = generateItem(owner.getId());
         BookingInputDto bookingInput = generateBookingInput(item.getId());
         Booking booking = new Booking(1L, bookingInput.getStart(), bookingInput.getEnd(),
                 ItemMapper.toItem(item), UserMapper.toUser(booker), Status.WAITING);
@@ -248,9 +232,6 @@ class BookingServiceUnitTest {
 
     @Test
     void testExceptionGetBookingByBookingIdWhenNotFound() {
-        UserDto owner = generateUser();
-        UserDto booker = generateUser();
-        ItemDto item = generateItem(owner.getId());
         BookingInputDto bookingInput = generateBookingInput(item.getId());
         Booking booking = new Booking(1L, bookingInput.getStart(), bookingInput.getEnd(),
                 ItemMapper.toItem(item), UserMapper.toUser(booker), Status.WAITING);
@@ -264,14 +245,11 @@ class BookingServiceUnitTest {
 
     @Test
     void getAllBookingsByUserIdWhenCurrentState() {
-        UserDto owner = generateUser();
-        UserDto booker = generateUser();
-        ItemDto item1 = generateItem(owner.getId());
         ItemDto item2 = generateItem(owner.getId());
-        BookingInputDto bookingInput1 = generateBookingInput(item1.getId());
+        BookingInputDto bookingInput1 = generateBookingInput(item.getId());
         BookingInputDto bookingInput2 = generateBookingInput(item2.getId());
         Booking booking1 = new Booking(1L, bookingInput1.getStart(), bookingInput1.getEnd(),
-                ItemMapper.toItem(item1), UserMapper.toUser(booker), Status.APPROVED);
+                ItemMapper.toItem(item), UserMapper.toUser(booker), Status.APPROVED);
         Booking booking2 = new Booking(2L, bookingInput2.getStart(), bookingInput2.getEnd(),
                 ItemMapper.toItem(item2), UserMapper.toUser(booker), Status.WAITING);
 
@@ -287,14 +265,11 @@ class BookingServiceUnitTest {
 
     @Test
     void getAllBookingsByUserIdWhenPastState() {
-        UserDto owner = generateUser();
-        UserDto booker = generateUser();
-        ItemDto item1 = generateItem(owner.getId());
         ItemDto item2 = generateItem(owner.getId());
-        BookingInputDto bookingInput1 = generateBookingInput(item1.getId());
+        BookingInputDto bookingInput1 = generateBookingInput(item.getId());
         BookingInputDto bookingInput2 = generateBookingInput(item2.getId());
         Booking booking1 = new Booking(1L, bookingInput1.getStart(), bookingInput1.getEnd(),
-                ItemMapper.toItem(item1), UserMapper.toUser(booker), Status.APPROVED);
+                ItemMapper.toItem(item), UserMapper.toUser(booker), Status.APPROVED);
         Booking booking2 = new Booking(2L, bookingInput2.getStart(), bookingInput2.getEnd(),
                 ItemMapper.toItem(item2), UserMapper.toUser(booker), Status.APPROVED);
 
@@ -310,14 +285,11 @@ class BookingServiceUnitTest {
 
     @Test
     void testGetAllBookingsByUserIdWhenFutureState() {
-        UserDto owner = generateUser();
-        UserDto booker = generateUser();
-        ItemDto item1 = generateItem(owner.getId());
         ItemDto item2 = generateItem(owner.getId());
-        BookingInputDto bookingInput1 = generateBookingInput(item1.getId());
+        BookingInputDto bookingInput1 = generateBookingInput(item.getId());
         BookingInputDto bookingInput2 = generateBookingInput(item2.getId());
         Booking booking1 = new Booking(1L, bookingInput1.getStart(), bookingInput1.getEnd(),
-                ItemMapper.toItem(item1), UserMapper.toUser(booker), Status.APPROVED);
+                ItemMapper.toItem(item), UserMapper.toUser(booker), Status.APPROVED);
         Booking booking2 = new Booking(2L, bookingInput2.getStart(), bookingInput2.getEnd(),
                 ItemMapper.toItem(item2), UserMapper.toUser(booker), Status.APPROVED);
 
@@ -333,14 +305,11 @@ class BookingServiceUnitTest {
 
     @Test
     void testGetAllBookingsByUserIdWhenWaitingState() {
-        UserDto owner = generateUser();
-        UserDto booker = generateUser();
-        ItemDto item1 = generateItem(owner.getId());
         ItemDto item2 = generateItem(owner.getId());
-        BookingInputDto bookingInput1 = generateBookingInput(item1.getId());
+        BookingInputDto bookingInput1 = generateBookingInput(item.getId());
         BookingInputDto bookingInput2 = generateBookingInput(item2.getId());
         Booking booking1 = new Booking(1L, bookingInput1.getStart(), bookingInput1.getEnd(),
-                ItemMapper.toItem(item1), UserMapper.toUser(booker), Status.WAITING);
+                ItemMapper.toItem(item), UserMapper.toUser(booker), Status.WAITING);
         Booking booking2 = new Booking(2L, bookingInput2.getStart(), bookingInput2.getEnd(),
                 ItemMapper.toItem(item2), UserMapper.toUser(booker), Status.WAITING);
 
@@ -355,14 +324,11 @@ class BookingServiceUnitTest {
 
     @Test
     void testGetAllBookingsByUserIdWhenRejectedState() {
-        UserDto owner = generateUser();
-        UserDto booker = generateUser();
-        ItemDto item1 = generateItem(owner.getId());
         ItemDto item2 = generateItem(owner.getId());
-        BookingInputDto bookingInput1 = generateBookingInput(item1.getId());
+        BookingInputDto bookingInput1 = generateBookingInput(item.getId());
         BookingInputDto bookingInput2 = generateBookingInput(item2.getId());
         Booking booking1 = new Booking(1L, bookingInput1.getStart(), bookingInput1.getEnd(),
-                ItemMapper.toItem(item1), UserMapper.toUser(booker), Status.REJECTED);
+                ItemMapper.toItem(item), UserMapper.toUser(booker), Status.REJECTED);
         Booking booking2 = new Booking(2L, bookingInput2.getStart(), bookingInput2.getEnd(),
                 ItemMapper.toItem(item2), UserMapper.toUser(booker), Status.REJECTED);
 
@@ -377,14 +343,11 @@ class BookingServiceUnitTest {
 
     @Test
     void testGetAllBookingsByUserIdWhenAllState() {
-        UserDto owner = generateUser();
-        UserDto booker = generateUser();
-        ItemDto item1 = generateItem(owner.getId());
         ItemDto item2 = generateItem(owner.getId());
-        BookingInputDto bookingInput1 = generateBookingInput(item1.getId());
+        BookingInputDto bookingInput1 = generateBookingInput(item.getId());
         BookingInputDto bookingInput2 = generateBookingInput(item2.getId());
         Booking booking1 = new Booking(1L, bookingInput1.getStart(), bookingInput1.getEnd(),
-                ItemMapper.toItem(item1), UserMapper.toUser(booker), Status.REJECTED);
+                ItemMapper.toItem(item), UserMapper.toUser(booker), Status.REJECTED);
         Booking booking2 = new Booking(2L, bookingInput2.getStart(), bookingInput2.getEnd(),
                 ItemMapper.toItem(item2), UserMapper.toUser(booker), Status.APPROVED);
 
@@ -399,7 +362,6 @@ class BookingServiceUnitTest {
 
     @Test
     void testGetAllBookingsByUserIdWhenWrongState() {
-        UserDto booker = generateUser();
         when(userService.getById(anyLong()))
                 .thenReturn(booker);
 
@@ -408,14 +370,11 @@ class BookingServiceUnitTest {
 
     @Test
     void testGetAllBookingsByOwnerIdWhenCurrentState() {
-        UserDto owner = generateUser();
-        UserDto booker = generateUser();
-        ItemDto item1 = generateItem(owner.getId());
         ItemDto item2 = generateItem(owner.getId());
-        BookingInputDto bookingInput1 = generateBookingInput(item1.getId());
+        BookingInputDto bookingInput1 = generateBookingInput(item.getId());
         BookingInputDto bookingInput2 = generateBookingInput(item2.getId());
         Booking booking1 = new Booking(1L, bookingInput1.getStart(), bookingInput1.getEnd(),
-                ItemMapper.toItem(item1), UserMapper.toUser(booker), Status.APPROVED);
+                ItemMapper.toItem(item), UserMapper.toUser(booker), Status.APPROVED);
         Booking booking2 = new Booking(2L, bookingInput2.getStart(), bookingInput2.getEnd(),
                 ItemMapper.toItem(item2), UserMapper.toUser(booker), Status.WAITING);
 
@@ -431,14 +390,11 @@ class BookingServiceUnitTest {
 
     @Test
     void testGetAllBookingsByOwnerIdWhenPastState() {
-        UserDto owner = generateUser();
-        UserDto booker = generateUser();
-        ItemDto item1 = generateItem(owner.getId());
         ItemDto item2 = generateItem(owner.getId());
-        BookingInputDto bookingInput1 = generateBookingInput(item1.getId());
+        BookingInputDto bookingInput1 = generateBookingInput(item.getId());
         BookingInputDto bookingInput2 = generateBookingInput(item2.getId());
         Booking booking1 = new Booking(1L, bookingInput1.getStart(), bookingInput1.getEnd(),
-                ItemMapper.toItem(item1), UserMapper.toUser(booker), Status.APPROVED);
+                ItemMapper.toItem(item), UserMapper.toUser(booker), Status.APPROVED);
         Booking booking2 = new Booking(2L, bookingInput2.getStart(), bookingInput2.getEnd(),
                 ItemMapper.toItem(item2), UserMapper.toUser(booker), Status.APPROVED);
 
@@ -454,14 +410,11 @@ class BookingServiceUnitTest {
 
     @Test
     void testGetAllBookingsByOwnerIdWhenFutureState() {
-        UserDto owner = generateUser();
-        UserDto booker = generateUser();
-        ItemDto item1 = generateItem(owner.getId());
         ItemDto item2 = generateItem(owner.getId());
-        BookingInputDto bookingInput1 = generateBookingInput(item1.getId());
+        BookingInputDto bookingInput1 = generateBookingInput(item.getId());
         BookingInputDto bookingInput2 = generateBookingInput(item2.getId());
         Booking booking1 = new Booking(1L, bookingInput1.getStart(), bookingInput1.getEnd(),
-                ItemMapper.toItem(item1), UserMapper.toUser(booker), Status.APPROVED);
+                ItemMapper.toItem(item), UserMapper.toUser(booker), Status.APPROVED);
         Booking booking2 = new Booking(2L, bookingInput2.getStart(), bookingInput2.getEnd(),
                 ItemMapper.toItem(item2), UserMapper.toUser(booker), Status.APPROVED);
 
@@ -477,14 +430,11 @@ class BookingServiceUnitTest {
 
     @Test
     void testGetAllBookingsByOwnerIdWhenWaitingState() {
-        UserDto owner = generateUser();
-        UserDto booker = generateUser();
-        ItemDto item1 = generateItem(owner.getId());
         ItemDto item2 = generateItem(owner.getId());
-        BookingInputDto bookingInput1 = generateBookingInput(item1.getId());
+        BookingInputDto bookingInput1 = generateBookingInput(item.getId());
         BookingInputDto bookingInput2 = generateBookingInput(item2.getId());
         Booking booking1 = new Booking(1L, bookingInput1.getStart(), bookingInput1.getEnd(),
-                ItemMapper.toItem(item1), UserMapper.toUser(booker), Status.WAITING);
+                ItemMapper.toItem(item), UserMapper.toUser(booker), Status.WAITING);
         Booking booking2 = new Booking(2L, bookingInput2.getStart(), bookingInput2.getEnd(),
                 ItemMapper.toItem(item2), UserMapper.toUser(booker), Status.WAITING);
 
@@ -499,14 +449,11 @@ class BookingServiceUnitTest {
 
     @Test
     void testGetAllBookingsByOwnerIdWhenRejectedState() {
-        UserDto owner = generateUser();
-        UserDto booker = generateUser();
-        ItemDto item1 = generateItem(owner.getId());
         ItemDto item2 = generateItem(owner.getId());
-        BookingInputDto bookingInput1 = generateBookingInput(item1.getId());
+        BookingInputDto bookingInput1 = generateBookingInput(item.getId());
         BookingInputDto bookingInput2 = generateBookingInput(item2.getId());
         Booking booking1 = new Booking(1L, bookingInput1.getStart(), bookingInput1.getEnd(),
-                ItemMapper.toItem(item1), UserMapper.toUser(booker), Status.REJECTED);
+                ItemMapper.toItem(item), UserMapper.toUser(booker), Status.REJECTED);
         Booking booking2 = new Booking(2L, bookingInput2.getStart(), bookingInput2.getEnd(),
                 ItemMapper.toItem(item2), UserMapper.toUser(booker), Status.REJECTED);
 
@@ -521,14 +468,11 @@ class BookingServiceUnitTest {
 
     @Test
     void testGetAllBookingsByOwnerIdWhenAllState() {
-        UserDto owner = generateUser();
-        UserDto booker = generateUser();
-        ItemDto item1 = generateItem(owner.getId());
         ItemDto item2 = generateItem(owner.getId());
-        BookingInputDto bookingInput1 = generateBookingInput(item1.getId());
+        BookingInputDto bookingInput1 = generateBookingInput(item.getId());
         BookingInputDto bookingInput2 = generateBookingInput(item2.getId());
         Booking booking1 = new Booking(1L, bookingInput1.getStart(), bookingInput1.getEnd(),
-                ItemMapper.toItem(item1), UserMapper.toUser(booker), Status.REJECTED);
+                ItemMapper.toItem(item), UserMapper.toUser(booker), Status.REJECTED);
         Booking booking2 = new Booking(2L, bookingInput2.getStart(), bookingInput2.getEnd(),
                 ItemMapper.toItem(item2), UserMapper.toUser(booker), Status.APPROVED);
 
@@ -543,7 +487,6 @@ class BookingServiceUnitTest {
 
     @Test
     void testGetAllBookingsByOwnerIdWhenWrongState() {
-        UserDto owner = generateUser();
         when(userService.getById(anyLong()))
                 .thenReturn(owner);
 
@@ -552,7 +495,6 @@ class BookingServiceUnitTest {
 
     @Test
     void testGetEmptyListOfBookingsByOwnerId() {
-        UserDto owner = generateUser();
         when(userService.getById(anyLong()))
                 .thenReturn(owner);
 

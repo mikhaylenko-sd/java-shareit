@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,6 +32,8 @@ public class ItemServiceTest {
     private final UserService userService;
     private static int counter = 0;
 
+    private UserDto newUserDto;
+
     private static UserDto generateUser() {
         return UserDto
                 .builder()
@@ -55,10 +58,13 @@ public class ItemServiceTest {
                 .build();
     }
 
+    @BeforeEach
+    void createDto() {
+        newUserDto = userService.create(generateUser());
+    }
+
     @Test
     void testGetAllItemsByOwnerId() {
-        UserDto newUserDto = userService.create(generateUser());
-
         assertEquals(0, itemService.getAllByOwnerId(newUserDto.getId(), FROM, SIZE).size());
 
         ItemDto newItemDto1 = itemService.create(newUserDto.getId(), generateItem(newUserDto.getId()));
@@ -72,13 +78,11 @@ public class ItemServiceTest {
 
     @Test
     void testGetAllEmptyListByOwnerId() {
-        UserDto newUserDto = userService.create(generateUser());
         assertEquals(0, itemService.getAllByOwnerId(newUserDto.getId(), FROM, SIZE).size());
     }
 
     @Test
     void testGetItemById() {
-        UserDto newUserDto = userService.create(generateUser());
         ItemDto itemDto = generateItem(newUserDto.getId());
 
         ItemDto newItemDto = itemService.create(newUserDto.getId(), itemDto);
@@ -90,7 +94,6 @@ public class ItemServiceTest {
 
     @Test
     void testCreateItem() {
-        UserDto newUserDto = userService.create(generateUser());
         ItemDto itemDto = itemService.create(newUserDto.getId(), generateItem(newUserDto.getId()));
         ItemDto returnItemDto = itemService.getById(newUserDto.getId(), itemDto.getId());
 
@@ -101,14 +104,12 @@ public class ItemServiceTest {
 
     @Test
     void testExceptionCreateItemByNotExistUser() {
-        UserDto newUserDto = userService.create(generateUser());
         ItemDto itemDto = generateItem(newUserDto.getId());
         assertThrows(UserNotFoundException.class, () -> itemService.create(111L, itemDto));
     }
 
     @Test
     void testUpdateItem() {
-        UserDto newUserDto = userService.create(generateUser());
         ItemDto itemDtoCreate = itemService.create(newUserDto.getId(), generateItem(newUserDto.getId()));
         ItemDto returnItemDtoBefore = itemService.getById(newUserDto.getId(), itemDtoCreate.getId());
 
@@ -123,13 +124,11 @@ public class ItemServiceTest {
 
     @Test
     void testExceptionUpdateItemByNotExistItem() {
-        UserDto newUserDto = userService.create(generateUser());
         assertThrows(ItemNotFoundException.class, () -> itemService.update(newUserDto.getId(), generateItem(newUserDto.getId())));
     }
 
     @Test
     void testDeleteItem() {
-        UserDto newUserDto = userService.create(generateUser());
         ItemDto itemDto = itemService.create(newUserDto.getId(), generateItem(newUserDto.getId()));
         assertEquals(1, itemService.getAllByOwnerId(newUserDto.getId(), FROM, SIZE).size());
 
@@ -139,7 +138,6 @@ public class ItemServiceTest {
 
     @Test
     void testDeleteItemById() {
-        UserDto newUserDto = userService.create(generateUser());
         ItemDto itemDto = itemService.create(newUserDto.getId(), generateItem(newUserDto.getId()));
         assertEquals(1, itemService.getAllByOwnerId(newUserDto.getId(), FROM, SIZE).size());
 
@@ -149,15 +147,13 @@ public class ItemServiceTest {
 
     @Test
     void testReturnItemsBySearching() {
-        UserDto newUserDto = userService.create(generateUser());
-        ItemDto newItemDto1 = itemService.create(newUserDto.getId(), generateItem(newUserDto.getId()));
-        ItemDto newItemDto2 = itemService.create(newUserDto.getId(), generateItem(newUserDto.getId()));
+        itemService.create(newUserDto.getId(), generateItem(newUserDto.getId()));
+        itemService.create(newUserDto.getId(), generateItem(newUserDto.getId()));
         assertEquals(2, itemService.searchItemsByText("item", FROM, SIZE).size());
     }
 
     @Test
     void testExceptionAddCommentWhenUserIsNotBooker() {
-        UserDto newUserDto = userService.create(generateUser());
         ItemDto newItemDto = itemService.create(newUserDto.getId(), generateItem(newUserDto.getId()));
         assertThrows(CommentCreationException.class, () -> itemService.addComment(newUserDto.getId(), newItemDto.getId(), generateComment()));
     }

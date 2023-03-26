@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,7 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 @SpringBootTest
 @Transactional
 class UserServiceTest {
-    private UserService userService;
+    private final UserService userService;
+    private UserDto userDto;
 
     private final User userTest = User
             .builder()
@@ -27,16 +29,19 @@ class UserServiceTest {
         this.userService = userService;
     }
 
+    @BeforeEach
+    void createDto() {
+        userDto = userService.create(UserMapper.toUserDto(userTest));
+    }
+
     @Test
     void shouldCreateUser() {
-        UserDto userDto = userService.create(UserMapper.toUserDto(userTest));
         assertThat(userDto.getName(), equalTo(userTest.getName()));
         assertThat(userDto.getEmail(), equalTo(userTest.getEmail()));
     }
 
     @Test
     void shouldUpdateUser() {
-        UserDto userDto = userService.create(UserMapper.toUserDto(userTest));
         userDto.setName("user1111");
         userDto.setEmail("user1111@mail.ru");
         UserDto userDtoUpdated = userService.update(userDto);
@@ -55,7 +60,6 @@ class UserServiceTest {
                 .name("name2")
                 .email("email2@ya.ru")
                 .build();
-        UserDto userDto = userService.create(UserMapper.toUserDto(userTest));
         UserDto userDto1 = userService.create(UserMapper.toUserDto(userTest1));
 
         assertEquals(userService.getAll().size(), 2);
@@ -65,13 +69,11 @@ class UserServiceTest {
 
     @Test
     void shouldGetUserById() {
-        UserDto userDto = userService.create(UserMapper.toUserDto(userTest));
         assertEquals(userService.getById(userDto.getId()), userDto);
     }
 
     @Test
     void shouldDeleteUser() {
-        UserDto userDto = userService.create(UserMapper.toUserDto(userTest));
         int size = userService.getAll().size();
         assertEquals(size, 1);
         userService.delete(userDto);
@@ -80,7 +82,6 @@ class UserServiceTest {
 
     @Test
     void shouldDeleteUserById() {
-        UserDto userDto = userService.create(UserMapper.toUserDto(userTest));
         int size = userService.getAll().size();
         assertEquals(size, 1);
         userService.deleteById(userDto.getId());

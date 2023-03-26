@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,15 +37,20 @@ public class BookingServiceTest {
     private final ItemService itemService;
     private final UserService userService;
     private final BookingService bookingService;
+    private UserDto ownerUser;
+    private UserDto bookerUser;
+    private ItemDto itemDto;
+
+    @BeforeEach
+    void createDto() {
+        ownerUser = userService.create(generateUserDto());
+        bookerUser = userService.create(generateUserDto());
+        itemDto = itemService.create(ownerUser.getId(), generateItemDto(ownerUser.getId()));
+    }
 
     @Test
     void testCreateBooking() {
-        UserDto ownerUser = userService.create(generateUserDto());
-        ItemDto itemDto = itemService.create(ownerUser.getId(), generateItemDto(ownerUser.getId()));
-
-        UserDto bookerUser = userService.create(generateUserDto());
         BookingOutputDto booking = bookingService.createBooking(bookerUser.getId(), generateBookingInputDto(itemDto.getId()));
-
         assertEquals(bookerUser.getId(), booking.getBookerId());
         assertEquals(Status.WAITING, booking.getStatus());
         assertEquals(itemDto.getId(), booking.getItem().getId());
@@ -54,13 +60,7 @@ public class BookingServiceTest {
     @Test
     void testCreateBookingWithErrorParams() {
         assertThrows(UserNotFoundException.class, () -> bookingService.createBooking(-1, generateBookingInputDto(-1)));
-
-        UserDto bookerUser = userService.create(generateUserDto());
         assertThrows(ItemNotFoundException.class, () -> bookingService.createBooking(bookerUser.getId(), generateBookingInputDto(-1)));
-
-
-        UserDto ownerUser = userService.create(generateUserDto());
-        ItemDto itemDto = itemService.create(ownerUser.getId(), generateItemDto(ownerUser.getId()));
         assertThrows(BookingNotFoundException.class, () -> bookingService.createBooking(ownerUser.getId(), generateBookingInputDto(itemDto.getId())));
 
         itemDto.setAvailable(false);
@@ -70,13 +70,7 @@ public class BookingServiceTest {
 
     @Test
     void testApproveAndRejectBooking() {
-        UserDto ownerUser = userService.create(generateUserDto());
-        ItemDto itemDto1 = itemService.create(ownerUser.getId(), generateItemDto(ownerUser.getId()));
-
-
-        UserDto bookerUser = userService.create(generateUserDto());
-        BookingOutputDto booking1 = bookingService.createBooking(bookerUser.getId(), generateBookingInputDto(itemDto1.getId()));
-
+        BookingOutputDto booking1 = bookingService.createBooking(bookerUser.getId(), generateBookingInputDto(itemDto.getId()));
         booking1 = bookingService.approveOrRejectBooking(booking1.getId(), ownerUser.getId(), true);
         assertEquals(Status.APPROVED, booking1.getStatus());
 
@@ -88,12 +82,7 @@ public class BookingServiceTest {
 
     @Test
     void testFailedApproveAndRejectBooking() {
-        UserDto ownerUser = userService.create(generateUserDto());
-        ItemDto itemDto = itemService.create(ownerUser.getId(), generateItemDto(ownerUser.getId()));
-        UserDto bookerUser = userService.create(generateUserDto());
-
         BookingOutputDto booking = bookingService.createBooking(bookerUser.getId(), generateBookingInputDto(itemDto.getId()));
-
         assertThrows(BookingNotFoundException.class, () -> bookingService.approveOrRejectBooking(booking.getId(), bookerUser.getId(), true));
         bookingService.approveOrRejectBooking(booking.getId(), ownerUser.getId(), true);
         assertThrows(InvalidFieldException.class, () -> bookingService.approveOrRejectBooking(booking.getId(), ownerUser.getId(), true));
@@ -101,12 +90,7 @@ public class BookingServiceTest {
 
     @Test
     void testGetBookingByBookingId() {
-        UserDto ownerUser = userService.create(generateUserDto());
-        ItemDto itemDto = itemService.create(ownerUser.getId(), generateItemDto(ownerUser.getId()));
-        UserDto bookerUser = userService.create(generateUserDto());
-
         BookingOutputDto booking = bookingService.createBooking(bookerUser.getId(), generateBookingInputDto(itemDto.getId()));
-
         BookingOutputDto bookingResult = bookingService.getBookingByBookingId(booking.getId(), ownerUser.getId());
         assertEquals(booking, bookingResult);
 
@@ -116,23 +100,13 @@ public class BookingServiceTest {
 
     @Test
     void testGetBookingByBookingIdRequestFromNotOwnerAndNotBookerUser() {
-        UserDto ownerUser = userService.create(generateUserDto());
-        ItemDto itemDto = itemService.create(ownerUser.getId(), generateItemDto(ownerUser.getId()));
-        UserDto bookerUser = userService.create(generateUserDto());
-
         BookingOutputDto booking = bookingService.createBooking(bookerUser.getId(), generateBookingInputDto(itemDto.getId()));
-
         UserDto notOwnerAndNotBookerUser = userService.create(generateUserDto());
         assertThrows(BookingNotFoundException.class, () -> bookingService.getBookingByBookingId(booking.getId(), notOwnerAndNotBookerUser.getId()));
     }
 
     @Test
     void testDifferentStatesGetAllBookingsByUserId() {
-        UserDto ownerUser = userService.create(generateUserDto());
-        ItemDto itemDto = itemService.create(ownerUser.getId(), generateItemDto(ownerUser.getId()));
-
-        UserDto bookerUser = userService.create(generateUserDto());
-
         LocalDateTime now = LocalDateTime.now();
 
         BookingOutputDto booking1 = bookingService.createBooking(bookerUser.getId(),
@@ -212,11 +186,6 @@ public class BookingServiceTest {
 
     @Test
     void testDifferentStatesGetAllBookingsByOwnerId() {
-        UserDto ownerUser = userService.create(generateUserDto());
-        ItemDto itemDto = itemService.create(ownerUser.getId(), generateItemDto(ownerUser.getId()));
-
-        UserDto bookerUser = userService.create(generateUserDto());
-
         LocalDateTime now = LocalDateTime.now();
 
         BookingOutputDto booking1 = bookingService.createBooking(bookerUser.getId(),

@@ -44,13 +44,11 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public List<ItemRequestDto> getAllRequests(long userId) {
         userService.getById(userId);
-        List<ItemRequestDto> itemRequestDtos = itemRequestRepository.findAllByRequestorId(userId).stream()
+        return itemRequestRepository.findAllByRequestorId(userId).stream()
                 .map(ItemRequestMapper::toItemRequestDto)
                 .sorted(Comparator.comparing(ItemRequestDto::getCreated))
+                .peek(this::setRequestItems)
                 .collect(Collectors.toList());
-        itemRequestDtos.forEach(this::setRequestItems);
-
-        return itemRequestDtos;
     }
 
     @Override
@@ -66,11 +64,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public List<ItemRequestDto> getAllItemRequestsByOtherRequestors(long userId, int from, int size) {
         userService.getById(userId);
-        List<ItemRequestDto> itemRequestDtos = itemRequestRepository.findAllByIdNotOrderByCreatedDesc(userId, PageRequest.of(from, size)).stream()
-                .map(ItemRequestMapper::toItemRequestDto).collect(Collectors.toList());
-        itemRequestDtos.forEach(this::setRequestItems);
-
-        return itemRequestDtos;
+        return itemRequestRepository.findAllByIdNotOrderByCreatedDesc(userId, PageRequest.of(from, size)).stream()
+                .map(ItemRequestMapper::toItemRequestDto)
+                .peek(this::setRequestItems)
+                .collect(Collectors.toList());
     }
 
     private void setRequestItems(ItemRequestDto itemRequestDto) {

@@ -43,13 +43,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> getAllByOwnerId(long ownerId, int from, int size) {
-        List<ItemDto> items = itemRepository.findAllByOwnerId(ownerId, PageRequest.of(from, size)).stream()
+        return itemRepository.findAllByOwnerId(ownerId, PageRequest.of(from, size)).stream()
                 .map(ItemMapper::toItemDto)
                 .sorted(Comparator.comparing(ItemDto::getId))
+                .peek(itemDto -> setLastAndNextBookings(itemDto.getId(), itemDto))
                 .collect(Collectors.toList());
-        items.forEach(itemDto -> setLastAndNextBookings(itemDto.getId(), itemDto));
-        return items;
-
     }
 
     @Override

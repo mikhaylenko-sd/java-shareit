@@ -1,6 +1,7 @@
 package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,6 +24,7 @@ public class ItemRequestServiceTest {
     private final UserService userService;
     private final ItemRequestService itemRequestService;
     private static int counter = 0;
+    private UserDto newUserDto;
 
     private static UserDto generateUser() {
         return UserDto
@@ -38,9 +40,13 @@ public class ItemRequestServiceTest {
                 .build();
     }
 
+    @BeforeEach
+    void createDto() {
+        newUserDto = userService.create(generateUser());
+    }
+
     @Test
     void testCreateItemRequest() {
-        UserDto newUserDto = userService.create(generateUser());
         ItemRequestDto newItemRequestDto = generateItemRequest();
         ItemRequestDto itemRequestDto = itemRequestService.create(newUserDto.getId(), newItemRequestDto);
 
@@ -50,7 +56,6 @@ public class ItemRequestServiceTest {
 
     @Test
     void testGetAllRequests() {
-        UserDto newUserDto = userService.create(generateUser());
         assertEquals(0, itemRequestService.getAllRequests(newUserDto.getId()).size());
 
         ItemRequestDto newItemRequestDto1 = generateItemRequest();
@@ -69,7 +74,6 @@ public class ItemRequestServiceTest {
 
     @Test
     void testGetItemRequestByRequestId() {
-        UserDto newUserDto = userService.create(generateUser());
         ItemRequestDto itemRequestDto1 = itemRequestService.create(newUserDto.getId(), generateItemRequest());
         ItemRequestDto itemRequestDto2 = itemRequestService.create(newUserDto.getId(), generateItemRequest());
         ItemRequestDto returnedItemRequestDto1 = itemRequestService.getItemRequestById(newUserDto.getId(), itemRequestDto1.getId());
@@ -85,14 +89,13 @@ public class ItemRequestServiceTest {
 
     @Test
     void testGetAllItemRequestsByOtherRequestors() {
-        UserDto newUserDto1 = userService.create(generateUser());
         UserDto newUserDto2 = userService.create(generateUser());
         ItemRequestDto itemRequestDto1 = itemRequestService.create(newUserDto2.getId(), generateItemRequest());
         ItemRequestDto itemRequestDto2 = itemRequestService.create(newUserDto2.getId(), generateItemRequest());
         ItemRequestDto returnedItemRequestDto1 = itemRequestService.getItemRequestById(newUserDto2.getId(), itemRequestDto1.getId());
         ItemRequestDto returnedItemRequestDto2 = itemRequestService.getItemRequestById(newUserDto2.getId(), itemRequestDto2.getId());
 
-        List<ItemRequestDto> allItemRequestsByOtherRequestors = itemRequestService.getAllItemRequestsByOtherRequestors(newUserDto1.getId(), FROM, SIZE);
+        List<ItemRequestDto> allItemRequestsByOtherRequestors = itemRequestService.getAllItemRequestsByOtherRequestors(newUserDto.getId(), FROM, SIZE);
         assertEquals(2, allItemRequestsByOtherRequestors.size());
         assertEquals(returnedItemRequestDto2.getId(), allItemRequestsByOtherRequestors.get(0).getId());
         assertEquals(returnedItemRequestDto1.getId(), allItemRequestsByOtherRequestors.get(1).getId());

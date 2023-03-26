@@ -49,13 +49,13 @@ class ItemControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    private UserDto userOwnerDto = UserDto
+    private final UserDto userOwnerDto = UserDto
             .builder()
             .id(1L)
             .email("userOwner@ya.ru")
             .name("userOwnerName")
             .build();
-    private ItemDto itemDto = ItemDto
+    private final ItemDto itemDto = ItemDto
             .builder()
             .id(1L)
             .name("ItemName")
@@ -67,7 +67,7 @@ class ItemControllerTest {
             .lastBooking(null)
             .nextBooking(null)
             .build();
-    private ItemDto itemDto2 = ItemDto
+    private final ItemDto itemDto2 = ItemDto
             .builder()
             .id(2L)
             .name("ItemName")
@@ -212,7 +212,7 @@ class ItemControllerTest {
     }
 
     @Test
-    void testRemoveItemById() throws Exception {
+    void testDeleteItemById() throws Exception {
         mvc.perform(delete("/items/1")
                         .header(REQUEST_HEADER, 1)
                         .characterEncoding(StandardCharsets.UTF_8))
@@ -221,27 +221,6 @@ class ItemControllerTest {
 
     @Test
     void testDeleteItem() throws Exception {
-        when(itemService.create(anyLong(), any(ItemDto.class)))
-                .thenReturn(itemDto);
-
-        mvc.perform(post("/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .header(REQUEST_HEADER, 1)
-                        .content(mapper.writeValueAsString(itemDto)))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(itemDto.getId()), Long.class))
-                .andExpect(jsonPath("$.name", is(itemDto.getName()), String.class))
-                .andExpect(jsonPath("$.description", is(itemDto.getDescription()), String.class))
-                .andExpect(jsonPath("$.ownerId", is(itemDto.getOwnerId()), Long.class))
-                .andExpect(jsonPath("$.available", is(itemDto.getAvailable()), Boolean.class));
-
-    }
-
-    @Test
-    void test() throws Exception {
         mvc.perform(delete("/items")
                         .header(REQUEST_HEADER, 1L)
                         .contentType(MediaType.APPLICATION_JSON)
