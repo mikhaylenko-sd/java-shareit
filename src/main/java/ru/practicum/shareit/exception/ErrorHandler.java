@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class ErrorHandler {
 
-    @ExceptionHandler({ItemNotFoundException.class,
-            UserNotFoundException.class, BookingNotFoundException.class}
+    @ExceptionHandler({ItemNotFoundException.class, UserNotFoundException.class,
+            BookingNotFoundException.class, ItemRequestNotFoundException.class}
     )
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final InvalidIdException e) {

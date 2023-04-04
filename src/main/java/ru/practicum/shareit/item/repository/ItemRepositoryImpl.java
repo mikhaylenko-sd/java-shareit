@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.repository;
 
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.item.Item;
 
 import java.util.List;
@@ -14,8 +15,8 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
     }
 
     @Override
-    public List<Item> searchItemsByText(String text) {
-        return itemRepository.findAll().stream()
+    public List<Item> searchItemsByText(String text, PageRequest pageRequest) {
+        return itemRepository.findAll(pageRequest).stream()
                 .filter(item -> item.getAvailable() && (item.getName().toLowerCase().contains(text) || item.getDescription().toLowerCase().contains(text)))
                 .collect(Collectors.toList());
     }
