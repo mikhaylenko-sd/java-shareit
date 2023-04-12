@@ -36,7 +36,7 @@ public class BookingController {
     }
 
     @PatchMapping(value = "/{" + BOOKING_ID_PATH_VARIABLE + "}")
-    public ResponseEntity<Object> approveOrRejectBooking(@PathVariable(value = BOOKING_ID_PATH_VARIABLE) long bookingId, @RequestHeader(REQUEST_HEADER) long ownerId, @RequestParam(value = "approved") boolean approved) {
+    public ResponseEntity<Object> approveOrRejectBooking(@PathVariable(value = BOOKING_ID_PATH_VARIABLE) long bookingId, @RequestHeader(REQUEST_HEADER) long ownerId, @RequestParam boolean approved) {
         log.info("Получен запрос к эндпоинту: {} /bookings/{}", "PATCH", bookingId);
         return bookingClient.approveOrRejectBooking(bookingId, ownerId, approved);
     }
@@ -49,23 +49,23 @@ public class BookingController {
 
     @GetMapping
     public ResponseEntity<Object> getAllBookingsByUserId(@RequestHeader(REQUEST_HEADER) long userId, @RequestParam(value = "state", defaultValue = "ALL") String stateParam,
-                                                         @RequestParam(value = "from", required = false, defaultValue = "0") int from,
-                                                         @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+                                                         @RequestParam(required = false, defaultValue = "0") int from,
+                                                         @RequestParam(required = false, defaultValue = "10") int size) {
         log.info("Получен запрос к эндпоинту: {} /bookings?from={}&size={}", "GET", from, size);
         parameterPaginationService.validateRequestParameters(from, size);
         BookingState state = BookingState.from(stateParam)
-                .orElseThrow(() -> new UnsupportedStatusException());
+                .orElseThrow(UnsupportedStatusException::new);
         return bookingClient.getAllBookingsByUserId(userId, state, from, size);
     }
 
     @GetMapping(value = "/owner")
     public ResponseEntity<Object> getAllBookingsByOwner(@RequestHeader(REQUEST_HEADER) long ownerId, @RequestParam(value = "state", defaultValue = "ALL") String stateParam,
-                                                        @RequestParam(value = "from", required = false, defaultValue = "0") int from,
-                                                        @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+                                                        @RequestParam(required = false, defaultValue = "0") int from,
+                                                        @RequestParam(required = false, defaultValue = "10") int size) {
         log.info("Получен запрос к эндпоинту: {} /bookings/owner?from={}&size={}", "GET", from, size);
         parameterPaginationService.validateRequestParameters(from, size);
         BookingState state = BookingState.from(stateParam)
-                .orElseThrow(() -> new UnsupportedStatusException());
+                .orElseThrow(UnsupportedStatusException::new);
         return bookingClient.getAllBookingsByOwnerId(ownerId, state, from, size);
     }
 }

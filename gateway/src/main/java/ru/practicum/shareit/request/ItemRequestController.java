@@ -37,14 +37,14 @@ public class ItemRequestController {
     }
 
     @GetMapping(value = "/{requestId}")
-    public ResponseEntity<Object> getItemRequestById(@RequestHeader(REQUEST_HEADER) long userId, @PathVariable(value = "requestId") long requestId) {
+    public ResponseEntity<Object> getItemRequestById(@RequestHeader(REQUEST_HEADER) long userId, @PathVariable long requestId) {
         log.info("Получен запрос к эндпоинту: {} /requests/{}", "GET", requestId);
         return itemRequestClient.getItemRequestById(userId, requestId);
     }
 
     @GetMapping(value = "/all")
-    public ResponseEntity<Object> getAllItemRequestsByOtherRequestors(@RequestHeader(REQUEST_HEADER) long userId, @RequestParam(value = "from", required = false, defaultValue = "0") int from,
-                                                                      @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+    public ResponseEntity<Object> getAllItemRequestsByOtherRequestors(@RequestHeader(REQUEST_HEADER) long userId, @RequestParam(required = false, defaultValue = "0") int from,
+                                                                      @RequestParam(required = false, defaultValue = "10") int size) {
         log.info("Получен запрос к эндпоинту: {} /requests/all/?from={}&size={}", "GET", from, size);
         parameterPaginationService.validateRequestParameters(from, size);
         return itemRequestClient.getAllItemRequestsByOtherRequestors(userId, from, size);

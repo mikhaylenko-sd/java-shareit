@@ -29,8 +29,8 @@ public class ItemController {
     private ParameterPaginationService parameterPaginationService;
 
     @GetMapping
-    public ResponseEntity<Object> findAllItems(@RequestHeader(REQUEST_HEADER) long ownerId, @RequestParam(value = "from", required = false, defaultValue = "0") int from,
-                                               @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+    public ResponseEntity<Object> findAllItems(@RequestHeader(REQUEST_HEADER) long ownerId, @RequestParam(required = false, defaultValue = "0") int from,
+                                               @RequestParam(required = false, defaultValue = "10") int size) {
         log.info("Получен запрос к эндпоинту: {} /items?from={}&size={}", "GET", from, size);
         parameterPaginationService.validateRequestParameters(from, size);
         return itemClient.getAllByOwnerId(ownerId, from, size);
@@ -60,8 +60,8 @@ public class ItemController {
     }
 
     @GetMapping(value = "/search")
-    public ResponseEntity<Object> searchItems(@RequestParam String text, @RequestParam(value = "from", required = false, defaultValue = "0") int from,
-                                              @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+    public ResponseEntity<Object> searchItems(@RequestParam String text, @RequestParam(required = false, defaultValue = "0") int from,
+                                              @RequestParam(required = false, defaultValue = "10") int size) {
         log.info("Получен запрос к эндпоинту: {} /items/search?from={}&size={}", "GET", from, size);
         parameterPaginationService.validateRequestParameters(from, size);
         return itemClient.searchItemsByText(text, from, size);

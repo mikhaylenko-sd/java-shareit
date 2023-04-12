@@ -33,7 +33,7 @@ public class BookingController {
     }
 
     @PatchMapping(value = "/{" + BOOKING_ID_PATH_VARIABLE + "}")
-    public BookingOutputDto approveOrRejectBooking(@PathVariable(value = BOOKING_ID_PATH_VARIABLE) long bookingId, @RequestHeader(REQUEST_HEADER) long ownerId, @RequestParam(value = "approved") boolean approved) {
+    public BookingOutputDto approveOrRejectBooking(@PathVariable(value = BOOKING_ID_PATH_VARIABLE) long bookingId, @RequestHeader(REQUEST_HEADER) long ownerId, @RequestParam boolean approved) {
         log.info("Получен запрос к эндпоинту: {} /bookings/{}", "PATCH", bookingId);
         return bookingService.approveOrRejectBooking(bookingId, ownerId, approved);
     }
@@ -46,16 +46,16 @@ public class BookingController {
 
     @GetMapping
     public List<BookingOutputDto> getAllBookingsByUserId(@RequestHeader(REQUEST_HEADER) long userId, @RequestParam(value = "state", defaultValue = "ALL") String stateParam,
-                                                         @RequestParam(value = "from", required = false, defaultValue = "0") int from,
-                                                         @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+                                                         @RequestParam(required = false, defaultValue = "0") int from,
+                                                         @RequestParam(required = false, defaultValue = "10") int size) {
         log.info("Получен запрос к эндпоинту: {} /bookings?from={}&size={}", "GET", from, size);
         return bookingService.getAllBookingsByUserId(userId, stateParam, from, size);
     }
 
     @GetMapping(value = "/owner")
     public List<BookingOutputDto> getAllBookingsByOwner(@RequestHeader(REQUEST_HEADER) long ownerId, @RequestParam(value = "state", defaultValue = "ALL") String stateParam,
-                                                        @RequestParam(value = "from", required = false, defaultValue = "0") int from,
-                                                        @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+                                                        @RequestParam(required = false, defaultValue = "0") int from,
+                                                        @RequestParam(required = false, defaultValue = "10") int size) {
         log.info("Получен запрос к эндпоинту: {} /bookings/owner?from={}&size={}", "GET", from, size);
         return bookingService.getAllBookingsByOwnerId(ownerId, stateParam, from, size);
     }

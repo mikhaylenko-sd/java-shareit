@@ -27,8 +27,8 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping
-    public List<ItemDto> findAllItems(@RequestHeader(REQUEST_HEADER) long ownerId, @RequestParam(value = "from", required = false, defaultValue = "0") int from,
-                                      @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+    public List<ItemDto> findAllItems(@RequestHeader(REQUEST_HEADER) long ownerId, @RequestParam(required = false, defaultValue = "0") int from,
+                                      @RequestParam(required = false, defaultValue = "10") int size) {
         log.info("Получен запрос к эндпоинту: {} /items?from={}&size={}", "GET", from, size);
         return itemService.getAllByOwnerId(ownerId, from, size);
     }
@@ -55,8 +55,8 @@ public class ItemController {
     }
 
     @GetMapping(value = "/search")
-    public List<ItemDto> searchItems(@RequestParam String text, @RequestParam(value = "from", required = false, defaultValue = "0") int from,
-                                     @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+    public List<ItemDto> searchItems(@RequestParam String text, @RequestParam(required = false, defaultValue = "0") int from,
+                                     @RequestParam(required = false, defaultValue = "10") int size) {
         log.info("Получен запрос к эндпоинту: {} /items/search?from={}&size={}", "GET", from, size);
         return itemService.searchItemsByText(text, from, size);
     }
